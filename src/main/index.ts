@@ -11,7 +11,8 @@ let fabWindow: BrowserWindow
 
 function createMainWindow(): BrowserWindow {
   const win = new BrowserWindow({
-    width: 900, height: 600, minWidth: 700, minHeight: 500, show: false,
+    width: 900, height: 600, minWidth: 700, minHeight: 500,
+    show: false, center: true, frame: false, backgroundColor: '#0d0d1a',
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       contextIsolation: true, nodeIntegration: false
@@ -54,7 +55,7 @@ app.whenReady().then(() => {
   initDb(join(app.getPath('userData'), 'tasks.db'))
   mainWindow = createMainWindow()
   fabWindow = createFabWindow()
-  registerIpcHandlers(mainWindow, fabWindow)
+  registerIpcHandlers(mainWindow, fabWindow, store)
   const stopScheduler = startScheduler(mainWindow, fabWindow)
   app.on('before-quit', stopScheduler)
 })

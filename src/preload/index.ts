@@ -15,6 +15,11 @@ contextBridge.exposeInMainWorld('api', {
   updateSubtask: (id: number, completed: boolean) => ipcRenderer.invoke('update-subtask', id, completed),
   deleteSubtask: (id: number) => ipcRenderer.invoke('delete-subtask', id),
   openMain: () => ipcRenderer.invoke('open-main'),
+  minimizeWindow: () => ipcRenderer.invoke('minimize-window'),
+  maximizeWindow: () => ipcRenderer.invoke('maximize-window'),
+  closeWindow: () => ipcRenderer.invoke('close-window'),
+  getFabPosition: (): Promise<{ x: number; y: number }> => ipcRenderer.invoke('get-fab-position'),
+  moveFabWindow: (x: number, y: number) => ipcRenderer.invoke('move-fab-window', x, y),
   onTasksUpdated: (cb: (count: number) => void) => {
     const h = (_: unknown, n: number) => cb(n)
     ipcRenderer.on('tasks-updated', h)

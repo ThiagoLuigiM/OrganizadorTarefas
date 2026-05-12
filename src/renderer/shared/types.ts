@@ -40,6 +40,11 @@ export interface ElectronAPI {
   updateSubtask: (id: number, completed: boolean) => Promise<Subtask>
   deleteSubtask: (id: number) => Promise<void>
   openMain: () => Promise<void>
+  minimizeWindow: () => Promise<void>
+  maximizeWindow: () => Promise<void>
+  closeWindow: () => Promise<void>
+  getFabPosition: () => Promise<{ x: number; y: number }>
+  moveFabWindow: (x: number, y: number) => Promise<void>
   onTasksUpdated: (cb: (count: number) => void) => () => void
   onTaskFocus: (cb: (taskId: number) => void) => () => void
 }

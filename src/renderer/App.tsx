@@ -3,6 +3,7 @@ import { useTasksApi } from './hooks/useTasksApi'
 import Sidebar from './components/Sidebar'
 import TaskList from './components/TaskList'
 import TaskDetail from './components/TaskDetail'
+import TitleBar from './components/TitleBar'
 import type { TaskFilter } from './shared/types'
 
 const FILTER_LABELS: Record<string, string> = { today: 'Hoje', priority: 'Prioritarias', all: 'Todas as tarefas' }
@@ -32,18 +33,21 @@ export default function App() {
   }
 
   return (
-    <div style={{ display: 'flex', height: '100%', background: '#0d0d1a' }}>
-      <Sidebar categories={api.categories} filter={api.filter}
-        pendingToday={pendingToday} pendingPriority={pendingPriority} pendingAll={pendingAll}
-        onFilterChange={(f: TaskFilter) => { api.setFilter(f); api.setSelectedTaskId(null) }}
-        onCreateCategory={api.createCategory} onDeleteCategory={api.deleteCategory} />
-      <TaskList tasks={api.tasks} selectedTaskId={api.selectedTaskId} filterLabel={filterLabel}
-        onSelectTask={api.setSelectedTaskId} onCreateTask={api.createTask} onUpdateTask={api.updateTask} />
-      {selectedTask && (
-        <TaskDetail task={selectedTask} subtasks={api.subtasks} categories={api.categories}
-          onUpdate={api.updateTask} onDelete={api.deleteTask} onClose={() => api.setSelectedTaskId(null)}
-          onCreateSubtask={api.createSubtask} onUpdateSubtask={api.updateSubtask} onDeleteSubtask={api.deleteSubtask} />
-      )}
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#0d0d1a' }}>
+      <TitleBar />
+      <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+        <Sidebar categories={api.categories} filter={api.filter}
+          pendingToday={pendingToday} pendingPriority={pendingPriority} pendingAll={pendingAll}
+          onFilterChange={(f: TaskFilter) => { api.setFilter(f); api.setSelectedTaskId(null) }}
+          onCreateCategory={api.createCategory} onDeleteCategory={api.deleteCategory} />
+        <TaskList tasks={api.tasks} selectedTaskId={api.selectedTaskId} filterLabel={filterLabel}
+          onSelectTask={api.setSelectedTaskId} onCreateTask={api.createTask} onUpdateTask={api.updateTask} />
+        {selectedTask && (
+          <TaskDetail task={selectedTask} subtasks={api.subtasks} categories={api.categories}
+            onUpdate={api.updateTask} onDelete={api.deleteTask} onClose={() => api.setSelectedTaskId(null)}
+            onCreateSubtask={api.createSubtask} onUpdateSubtask={api.updateSubtask} onDeleteSubtask={api.deleteSubtask} />
+        )}
+      </div>
     </div>
   )
 }

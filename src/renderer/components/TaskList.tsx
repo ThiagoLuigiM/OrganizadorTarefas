@@ -20,39 +20,49 @@ export default function TaskList({ tasks, selectedTaskId, filterLabel, onSelectT
     setNewTitle(''); setNewPriority('medium'); setAdding(false)
   }
 
+  const priorityColor = { high: '#ef4444', medium: '#f59e0b', low: '#22c55e' }
+
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-      <div style={{ padding: '14px 16px', borderBottom: '1px solid #1e1e35', display: 'flex', alignItems: 'center' }}>
-        <span style={{ fontWeight: 700, fontSize: 14, color: '#e2e2f0' }}>{filterLabel}</span>
-        <button onClick={() => setAdding(true)} style={{ marginLeft: 'auto', background: '#6c63ff', color: 'white', border: 'none', borderRadius: 6, padding: '5px 12px', fontSize: 11, cursor: 'pointer' }}>
-          + Nova tarefa
+      <div style={{ padding: '12px 16px', borderBottom: '1px solid #1a1a38', display: 'flex', alignItems: 'center', gap: 10 }}>
+        <span style={{ fontWeight: 700, fontSize: 14, color: '#e2e2f0', flex: 1 }}>{filterLabel}</span>
+        <button onClick={() => setAdding(true)} style={{
+          background: 'linear-gradient(135deg,#6c63ff,#8b82ff)', color: 'white', border: 'none',
+          borderRadius: 7, padding: '5px 14px', fontSize: 12, cursor: 'pointer', fontWeight: 600,
+          boxShadow: '0 2px 10px rgba(108,99,255,0.35)',
+        }}>
+          ＋ Nova tarefa
         </button>
       </div>
-      <div style={{ flex: 1, overflowY: 'auto', padding: 8 }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '10px 8px' }}>
         {adding && (
-          <div style={{ background: '#1e1e35', borderRadius: 8, padding: 10, marginBottom: 8 }}>
-            <input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="Titulo da tarefa" autoFocus
+          <div style={{ background: '#13132e', border: '1px solid #2a2a50', borderRadius: 10, padding: 12, marginBottom: 10 }}>
+            <input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="Título da tarefa…" autoFocus
               onKeyDown={(e) => { if (e.key === 'Enter') handleCreate(); if (e.key === 'Escape') setAdding(false) }}
-              style={{ width: '100%', background: '#111122', border: '1px solid #333', borderRadius: 4, padding: '6px 8px', color: '#e2e2f0', fontSize: 12, marginBottom: 8 }} />
-            <div style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
+              style={{ width: '100%', background: '#0d0d1a', border: '1px solid #2a2a50', borderRadius: 6, padding: '7px 10px', color: '#e2e2f0', fontSize: 13, marginBottom: 10 }} />
+            <div style={{ display: 'flex', gap: 5, marginBottom: 10 }}>
               {(['low', 'medium', 'high'] as Priority[]).map((p) => (
                 <button key={p} onClick={() => setNewPriority(p)} style={{
-                  flex: 1, border: 'none', borderRadius: 4, padding: 4, cursor: 'pointer', fontSize: 11,
-                  background: newPriority === p ? (p === 'high' ? '#ef4444' : p === 'medium' ? '#f59e0b' : '#22c55e') : '#1a1a2e',
-                  color: newPriority === p ? 'white' : '#888'
+                  flex: 1, border: `1px solid ${newPriority === p ? priorityColor[p] : '#2a2a50'}`,
+                  borderRadius: 6, padding: '4px 0', cursor: 'pointer', fontSize: 11, fontWeight: 600,
+                  background: newPriority === p ? priorityColor[p] + '22' : 'transparent',
+                  color: newPriority === p ? priorityColor[p] : '#6060a0',
                 }}>
-                  {p === 'high' ? 'Alta' : p === 'medium' ? 'Media' : 'Baixa'}
+                  {p === 'high' ? '🔴 Alta' : p === 'medium' ? '🟡 Média' : '🟢 Baixa'}
                 </button>
               ))}
             </div>
-            <div style={{ display: 'flex', gap: 4 }}>
-              <button onClick={handleCreate} style={{ flex: 1, background: '#6c63ff', color: 'white', border: 'none', borderRadius: 4, padding: 5, cursor: 'pointer', fontSize: 11 }}>Criar</button>
-              <button onClick={() => setAdding(false)} style={{ flex: 1, background: '#1a1a2e', color: '#888', border: 'none', borderRadius: 4, padding: 5, cursor: 'pointer', fontSize: 11 }}>Cancelar</button>
+            <div style={{ display: 'flex', gap: 5 }}>
+              <button onClick={handleCreate} style={{ flex: 1, background: '#6c63ff', color: 'white', border: 'none', borderRadius: 6, padding: 6, cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>Criar</button>
+              <button onClick={() => setAdding(false)} style={{ flex: 1, background: 'transparent', color: '#6060a0', border: '1px solid #2a2a50', borderRadius: 6, padding: 6, cursor: 'pointer', fontSize: 12 }}>Cancelar</button>
             </div>
           </div>
         )}
         {tasks.length === 0 && !adding && (
-          <div style={{ textAlign: 'center', color: '#555', fontSize: 12, marginTop: 40 }}>Nenhuma tarefa aqui.</div>
+          <div style={{ textAlign: 'center', color: '#3a3a6a', fontSize: 13, marginTop: 60 }}>
+            <div style={{ fontSize: 32, marginBottom: 10 }}>✓</div>
+            Nenhuma tarefa aqui.
+          </div>
         )}
         {tasks.map((task) => (
           <TaskItem key={task.id} task={task} selected={selectedTaskId === task.id}

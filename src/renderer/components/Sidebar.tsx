@@ -24,53 +24,72 @@ export default function Sidebar({ categories, filter, pendingToday, pendingPrior
 
   const btnStyle = (active: boolean): React.CSSProperties => ({
     display: 'flex', alignItems: 'center', gap: 8, width: '100%',
-    padding: '6px 8px', borderRadius: 6, border: 'none', cursor: 'pointer',
-    background: active ? '#1a1a35' : 'transparent',
-    color: active ? '#e2e2f0' : '#888', marginBottom: 2, textAlign: 'left'
+    padding: '7px 10px', borderRadius: 6, border: 'none', cursor: 'pointer',
+    background: active ? 'linear-gradient(90deg,#16163a,#1a1a40)' : 'transparent',
+    color: active ? '#e2e2f0' : '#6060a0',
+    marginBottom: 2, textAlign: 'left',
+    boxShadow: active ? 'inset 2px 0 0 #6c63ff' : 'none',
+    transition: 'background 0.15s, color 0.15s',
   })
 
+  const sectionLabel: React.CSSProperties = {
+    fontSize: 9, color: '#3a3a6a', fontWeight: 700, letterSpacing: 1.2, marginBottom: 6, paddingLeft: 2,
+  }
+
   return (
-    <aside style={{ width: 200, background: '#111122', borderRight: '1px solid #1e1e35', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
-      <div style={{ padding: 16, borderBottom: '1px solid #1e1e35' }}>
-        <span style={{ fontWeight: 700, fontSize: 15, color: '#a78bfa' }}>&#10003; OrganizadorTarefas</span>
+    <aside style={{ width: 200, background: '#0f0f24', borderRight: '1px solid #1a1a38', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+      <div style={{ padding: '14px 16px', borderBottom: '1px solid #1a1a38' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{
+            width: 26, height: 26, borderRadius: '50%',
+            background: 'linear-gradient(135deg,#6c63ff,#a78bfa)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 13, color: 'white', flexShrink: 0,
+          }}>✓</span>
+          <span style={{ fontWeight: 700, fontSize: 13, color: '#c4b5fd', letterSpacing: 0.2 }}>Tarefas</span>
+        </div>
       </div>
-      <div style={{ padding: '12px 16px 4px' }}>
-        <div style={{ fontSize: 9, color: '#555', fontWeight: 700, letterSpacing: 1, marginBottom: 6 }}>SMART LISTS</div>
-        {([['today', 'Hoje', pendingToday], ['priority', 'Prioritarias', pendingPriority], ['all', 'Todas', pendingAll]] as [TaskFilter, string, number][]).map(([f, label, count]) => (
+
+      <div style={{ padding: '14px 12px 4px' }}>
+        <div style={sectionLabel}>LISTAS</div>
+        {([['today', '📅  Hoje', pendingToday], ['priority', '🔥  Prioritárias', pendingPriority], ['all', '📋  Todas', pendingAll]] as [TaskFilter, string, number][]).map(([f, label, count]) => (
           <button key={String(f)} onClick={() => onFilterChange(f)} style={btnStyle(filter === f)}>
             <span style={{ flex: 1, fontSize: 12 }}>{label}</span>
-            {count > 0 && <span style={{ background: '#6c63ff', color: 'white', borderRadius: 10, padding: '1px 7px', fontSize: 10 }}>{count}</span>}
+            {count > 0 && (
+              <span style={{ background: '#6c63ff', color: 'white', borderRadius: 10, padding: '1px 7px', fontSize: 10, fontWeight: 600 }}>{count}</span>
+            )}
           </button>
         ))}
       </div>
-      <div style={{ padding: '12px 16px 4px', marginTop: 8, flex: 1 }}>
-        <div style={{ fontSize: 9, color: '#555', fontWeight: 700, letterSpacing: 1, marginBottom: 6 }}>CATEGORIAS</div>
+
+      <div style={{ padding: '14px 12px 4px', flex: 1 }}>
+        <div style={sectionLabel}>CATEGORIAS</div>
         {categories.map((cat) => (
           <button key={cat.id} onClick={() => onFilterChange(cat.id)} style={btnStyle(filter === cat.id)}>
-            <span style={{ width: 10, height: 10, borderRadius: '50%', background: cat.color, flexShrink: 0 }} />
+            <span style={{ width: 8, height: 8, borderRadius: '50%', background: cat.color, flexShrink: 0 }} />
             <span style={{ flex: 1, fontSize: 12 }}>{cat.name}</span>
             <span onClick={(e) => { e.stopPropagation(); onDeleteCategory(cat.id) }}
-              style={{ color: '#555', cursor: 'pointer', fontSize: 14, padding: '0 2px' }}>&times;</span>
+              style={{ color: '#3a3a6a', cursor: 'pointer', fontSize: 14, padding: '0 2px', lineHeight: 1 }}>&times;</span>
           </button>
         ))}
         {adding ? (
-          <div style={{ marginTop: 6 }}>
-            <input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Nome" autoFocus
+          <div style={{ marginTop: 8 }}>
+            <input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Nome da categoria" autoFocus
               onKeyDown={(e) => { if (e.key === 'Enter') handleAdd(); if (e.key === 'Escape') setAdding(false) }}
-              style={{ width: '100%', background: '#1a1a2e', border: '1px solid #333', borderRadius: 4, padding: '4px 8px', color: '#e2e2f0', fontSize: 12, marginBottom: 6 }} />
-            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 6 }}>
+              style={{ width: '100%', background: '#16163a', border: '1px solid #2a2a50', borderRadius: 6, padding: '5px 8px', color: '#e2e2f0', fontSize: 12, marginBottom: 6 }} />
+            <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 8 }}>
               {COLORS.map((c) => (
                 <button key={c} onClick={() => setNewColor(c)}
                   style={{ width: 18, height: 18, borderRadius: '50%', background: c, border: newColor === c ? '2px solid white' : '2px solid transparent', cursor: 'pointer' }} />
               ))}
             </div>
             <div style={{ display: 'flex', gap: 4 }}>
-              <button onClick={handleAdd} style={{ flex: 1, background: '#6c63ff', color: 'white', border: 'none', borderRadius: 4, padding: 4, cursor: 'pointer', fontSize: 11 }}>Criar</button>
-              <button onClick={() => setAdding(false)} style={{ flex: 1, background: '#1a1a2e', color: '#888', border: 'none', borderRadius: 4, padding: 4, cursor: 'pointer', fontSize: 11 }}>Cancelar</button>
+              <button onClick={handleAdd} style={{ flex: 1, background: '#6c63ff', color: 'white', border: 'none', borderRadius: 6, padding: '5px 4px', cursor: 'pointer', fontSize: 11, fontWeight: 600 }}>Criar</button>
+              <button onClick={() => setAdding(false)} style={{ flex: 1, background: '#16163a', color: '#6060a0', border: 'none', borderRadius: 6, padding: '5px 4px', cursor: 'pointer', fontSize: 11 }}>Cancelar</button>
             </div>
           </div>
         ) : (
-          <button onClick={() => setAdding(true)} style={{ ...btnStyle(false), color: '#444', fontSize: 12, marginTop: 2 }}>+ Nova categoria</button>
+          <button onClick={() => setAdding(true)} style={{ ...btnStyle(false), color: '#3a3a6a', fontSize: 12, marginTop: 4 }}>＋ Nova categoria</button>
         )}
       </div>
     </aside>
