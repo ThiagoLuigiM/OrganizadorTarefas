@@ -99,7 +99,7 @@ Toda leitura e escrita no banco de dados ocorre exclusivamente no Main process. 
 
 **Coluna 1 — Sidebar (200px fixo):**
 - Nome do app no topo
-- Smart lists: "Hoje", "Prioritárias", "Todas" (com contadores)
+- Smart lists: "Hoje" (due_at = hoje), "Prioritárias" (priority = high, pendentes), "Todas" (pendentes)
 - Seção de categorias com cor, nome e contagem
 - Botão "+ Nova categoria"
 - Rodapé com resumo (X pendentes, Y concluídas)
@@ -121,7 +121,7 @@ Toda leitura e escrita no banco de dados ocorre exclusivamente no Main process. 
 |--------|--------|
 | Normal | Botão roxo (#6c63ff) com ícone ✓, badge vermelho com contagem |
 | Hover | Botão ligeiramente maior e mais brilhante |
-| Todas concluídas | Botão verde (#22c55e), sem badge |
+| Todas concluídas \| Botão verde (#22c55e), sem badge — quando COUNT(*) WHERE completed_at IS NULL = 0 |
 
 ### Comportamento do FAB
 - Clique: abre/fecha a MainWindow posicionada próxima ao FAB
@@ -156,7 +156,7 @@ OrganizadorTarefas/
 │   │   │   ├── Sidebar/
 │   │   │   ├── TaskList/
 │   │   │   └── TaskDetail/
-│   │   └── hooks/         # useTasksapi IPC
+│   │   └── hooks/         # useTasksApi (hooks IPC)
 │   └── fab/               # React app (FabWindow)
 │       └── Fab.tsx
 ├── docs/
@@ -166,3 +166,4 @@ OrganizadorTarefas/
 ├── package.json
 └── electron.vite.config.ts
 ```
+
