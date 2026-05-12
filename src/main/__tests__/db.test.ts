@@ -4,9 +4,9 @@ import { join } from 'path'
 import { tmpdir } from 'os'
 import { initDb, closeDb, getDb, getCategories, createCategory, deleteCategory, getTasks, createTask, updateTask, deleteTask, getPendingCount } from '../db'
 
-const TEST_DB = join(tmpdir(), `ot-test-${Date.now()}.db`)
-beforeEach(() => { initDb(TEST_DB) })
-afterEach(() => { closeDb(); if (existsSync(TEST_DB)) unlinkSync(TEST_DB) })
+let TEST_DB = ''
+beforeEach(() => { TEST_DB = join(tmpdir(), `ot-test-${Date.now()}-${Math.random().toString(36).slice(2)}.db`); initDb(TEST_DB) })
+afterEach(() => { closeDb(); [TEST_DB, TEST_DB + '-wal', TEST_DB + '-shm'].forEach(f => { if (existsSync(f)) unlinkSync(f) }) })
 
 describe('initDb', () => {
   it('creates the database file', () => {

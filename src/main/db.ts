@@ -1,23 +1,22 @@
-import Database from 'better-sqlite3'
+﻿import { Database } from 'node-sqlite3-wasm'
 import type { Category, Task, Subtask, CreateTaskInput, UpdateTaskInput, CreateCategoryInput, TaskFilter } from '../renderer/shared/types'
 
-let db: Database.Database | null = null
+let db: Database | null = null
 
 export function initDb(dbPath: string): void {
   db = new Database(dbPath)
-  db.pragma('journal_mode = WAL')
-  db.pragma('foreign_keys = ON')
+  db.run('PRAGMA foreign_keys = ON')
   runMigrations(db)
 }
 
 export function closeDb(): void { db?.close(); db = null }
 
-export function getDb(): Database.Database {
+export function getDb(): Database {
   if (!db) throw new Error('Database not initialized. Call initDb() first.')
   return db
 }
 
-function runMigrations(database: Database.Database): void {
+function runMigrations(database: Database): void {
   database.exec(`
     CREATE TABLE IF NOT EXISTS categories (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -43,7 +42,7 @@ export function getCategories(): Category[] {
 
 export function createCategory(input: CreateCategoryInput): Category {
   const db = getDb(); const now = Date.now()
-  const result = db.prepare('INSERT INTO categories (name, color, created_at) VALUES (?, ?, ?)').run(input.name, input.color, now)
+  const result = db.prepare('INSERT INTO categories (name, color, created_at) VALUES (?, ?, ?)').run([input.name, input.color, now])
   return db.prepare('SELECT * FROM categories WHERE id = ?').get(result.lastInsertRowid) as Category
 }
 
@@ -58,7 +57,7 @@ export function getTasks(filter: TaskFilter): Task[] {
     const start = new Date(); start.setHours(0, 0, 0, 0)
     const end = new Date(); end.setHours(23, 59, 59, 999)
     return db.prepare('SELECT * FROM tasks WHERE completed_at IS NULL AND due_at BETWEEN ? AND ? ORDER BY position ASC')
-      .all(start.getTime(), end.getTime()) as Task[]
+      .all([start.getTime(), end.getTime()]) as Task[]
   }
   if (filter === 'priority') {
     return db.prepare("SELECT * FROM tasks WHERE completed_at IS NULL AND priority = 'high' ORDER BY position ASC").all() as Task[]
@@ -74,7 +73,7 @@ export function createTask(input: CreateTaskInput): Task {
   const maxPos = (db.prepare('SELECT MAX(position) as m FROM tasks').get() as { m: number | null }).m ?? -1
   const result = db.prepare(
     'INSERT INTO tasks (category_id, title, notes, priority, due_at, created_at, position) VALUES (?, ?, ?, ?, ?, ?, ?)'
-  ).run(input.category_id ?? null, input.title, input.notes ?? null, input.priority, input.due_at ?? null, now, maxPos + 1)
+  ).run([input.category_id ?? null, input.title, input.notes ?? null, input.priority, input.due_at ?? null, now, maxPos + 1])
   return db.prepare('SELECT * FROM tasks WHERE id = ?').get(result.lastInsertRowid) as Task
 }
 
@@ -90,7 +89,7 @@ export function updateTask(id: number, input: UpdateTaskInput): Task {
   if (input.completed_at !== undefined) m.completed_at = input.completed_at
   if (input.position !== undefined) m.position = input.position
   db.prepare('UPDATE tasks SET category_id=?, title=?, notes=?, priority=?, due_at=?, completed_at=?, position=? WHERE id=?')
-    .run(m.category_id, m.title, m.notes, m.priority, m.due_at, m.completed_at, m.position, id)
+    .run([m.category_id, m.title, m.notes, m.priority, m.due_at, m.completed_at, m.position, id])
   return db.prepare('SELECT * FROM tasks WHERE id = ?').get(id) as Task
 }
 
@@ -107,13 +106,13 @@ export function getSubtasks(taskId: number): Subtask[] {
 export function createSubtask(taskId: number, title: string): Subtask {
   const db = getDb()
   const maxPos = (db.prepare('SELECT MAX(position) as m FROM subtasks WHERE task_id = ?').get(taskId) as { m: number | null }).m ?? -1
-  const result = db.prepare('INSERT INTO subtasks (task_id, title, position) VALUES (?, ?, ?)').run(taskId, title, maxPos + 1)
+  const result = db.prepare('INSERT INTO subtasks (task_id, title, position) VALUES (?, ?, ?)').run([taskId, title, maxPos + 1])
   return db.prepare('SELECT * FROM subtasks WHERE id = ?').get(result.lastInsertRowid) as Subtask
 }
 
 export function updateSubtask(id: number, completed: boolean): Subtask {
   const db = getDb()
-  db.prepare('UPDATE subtasks SET completed_at = ? WHERE id = ?').run(completed ? Date.now() : null, id)
+  db.prepare('UPDATE subtasks SET completed_at = ? WHERE id = ?').run([completed ? Date.now() : null, id])
   return db.prepare('SELECT * FROM subtasks WHERE id = ?').get(id) as Subtask
 }
 
