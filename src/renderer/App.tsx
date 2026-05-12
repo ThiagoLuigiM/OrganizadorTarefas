@@ -39,7 +39,7 @@ export default function App() {
         <Sidebar categories={api.categories} filter={api.filter}
           pendingToday={pendingToday} pendingPriority={pendingPriority} pendingAll={pendingAll}
           onFilterChange={(f: TaskFilter) => { api.setFilter(f); api.setSelectedTaskId(null) }}
-          onCreateCategory={api.createCategory} onDeleteCategory={api.deleteCategory} />
+          onCreateCategory={(name, color) => api.createCategory({ name, color })} onDeleteCategory={api.deleteCategory} />
         <TaskList tasks={api.tasks} selectedTaskId={api.selectedTaskId} filterLabel={filterLabel}
           onSelectTask={api.setSelectedTaskId} onCreateTask={api.createTask} onUpdateTask={api.updateTask} />
         {selectedTask && (

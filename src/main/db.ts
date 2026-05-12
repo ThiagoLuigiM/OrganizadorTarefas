@@ -1,10 +1,21 @@
 ﻿import { Database } from 'node-sqlite3-wasm'
+import { existsSync, unlinkSync } from 'fs'
 import type { Category, Task, Subtask, CreateTaskInput, UpdateTaskInput, CreateCategoryInput, TaskFilter } from '../renderer/shared/types'
 
 let db: Database | null = null
 
 export function initDb(dbPath: string): void {
+  // node-sqlite3-wasm uses a `.lock` file for concurrency control.
+  // If the app was force-killed, this file is left stale and blocks reopening.
+  // Since requestSingleInstanceLock() guarantees only one instance runs,
+  // any pre-existing lock file here is always stale and safe to remove.
+  const lockPath = dbPath + '.lock'
+  if (existsSync(lockPath)) {
+    unlinkSync(lockPath)
+  }
   db = new Database(dbPath)
+  db.run('PRAGMA busy_timeout = 5000')
+  db.run('PRAGMA journal_mode = WAL')
   db.run('PRAGMA foreign_keys = ON')
   runMigrations(db)
 }
