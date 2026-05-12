@@ -1,4 +1,4 @@
-﻿import Database from 'better-sqlite3'
+import Database from 'better-sqlite3'
 import type { Category, Task, Subtask, CreateTaskInput, UpdateTaskInput, CreateCategoryInput, TaskFilter } from '../renderer/shared/types'
 
 let db: Database.Database | null = null
@@ -35,4 +35,18 @@ function runMigrations(database: Database.Database): void {
       title TEXT NOT NULL, completed_at INTEGER, position INTEGER NOT NULL DEFAULT 0
     );
   `)
+}
+
+export function getCategories(): Category[] {
+  return getDb().prepare('SELECT * FROM categories ORDER BY created_at ASC').all() as Category[]
+}
+
+export function createCategory(input: CreateCategoryInput): Category {
+  const db = getDb(); const now = Date.now()
+  const result = db.prepare('INSERT INTO categories (name, color, created_at) VALUES (?, ?, ?)').run(input.name, input.color, now)
+  return db.prepare('SELECT * FROM categories WHERE id = ?').get(result.lastInsertRowid) as Category
+}
+
+export function deleteCategory(id: number): void {
+  getDb().prepare('DELETE FROM categories WHERE id = ?').run(id)
 }
