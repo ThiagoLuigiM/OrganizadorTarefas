@@ -110,3 +110,51 @@ describe('tasks', () => {
     expect(getPendingCount()).toBe(1)
   })
 })
+
+import { getSubtasks, createSubtask, updateSubtask, deleteSubtask } from '../db'
+
+describe('subtasks', () => {
+  it('getSubtasks returns empty array for a new task', () => {
+    const task = createTask({ title: 'Parent', priority: 'low' })
+    expect(getSubtasks(task.id)).toEqual([])
+  })
+  it('createSubtask inserts and returns subtask', () => {
+    const task = createTask({ title: 'Parent', priority: 'low' })
+    const sub = createSubtask(task.id, 'Step one')
+    expect(sub.id).toBeGreaterThan(0)
+    expect(sub.task_id).toBe(task.id)
+    expect(sub.title).toBe('Step one')
+    expect(sub.completed_at).toBeNull()
+  })
+  it('getSubtasks returns subtasks in position order', () => {
+    const task = createTask({ title: 'Parent', priority: 'low' })
+    createSubtask(task.id, 'First')
+    createSubtask(task.id, 'Second')
+    const subs = getSubtasks(task.id)
+    expect(subs[0].title).toBe('First')
+    expect(subs[1].title).toBe('Second')
+  })
+  it('updateSubtask(id, true) sets completed_at', () => {
+    const task = createTask({ title: 'Parent', priority: 'low' })
+    const sub = createSubtask(task.id, 'Do thing')
+    expect(updateSubtask(sub.id, true).completed_at).toBeGreaterThan(0)
+  })
+  it('updateSubtask(id, false) clears completed_at', () => {
+    const task = createTask({ title: 'Parent', priority: 'low' })
+    const sub = createSubtask(task.id, 'Do thing')
+    updateSubtask(sub.id, true)
+    expect(updateSubtask(sub.id, false).completed_at).toBeNull()
+  })
+  it('deleteSubtask removes it', () => {
+    const task = createTask({ title: 'Parent', priority: 'low' })
+    const sub = createSubtask(task.id, 'Remove me')
+    deleteSubtask(sub.id)
+    expect(getSubtasks(task.id)).toHaveLength(0)
+  })
+  it('deleting a task cascades to subtasks', () => {
+    const task = createTask({ title: 'Parent', priority: 'low' })
+    createSubtask(task.id, 'Child')
+    deleteTask(task.id)
+    expect(getSubtasks(task.id)).toHaveLength(0)
+  })
+})

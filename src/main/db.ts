@@ -99,3 +99,24 @@ export function deleteTask(id: number): void { getDb().prepare('DELETE FROM task
 export function getPendingCount(): number {
   return (getDb().prepare('SELECT COUNT(*) as c FROM tasks WHERE completed_at IS NULL').get() as { c: number }).c
 }
+
+export function getSubtasks(taskId: number): Subtask[] {
+  return getDb().prepare('SELECT * FROM subtasks WHERE task_id = ? ORDER BY position ASC').all(taskId) as Subtask[]
+}
+
+export function createSubtask(taskId: number, title: string): Subtask {
+  const db = getDb()
+  const maxPos = (db.prepare('SELECT MAX(position) as m FROM subtasks WHERE task_id = ?').get(taskId) as { m: number | null }).m ?? -1
+  const result = db.prepare('INSERT INTO subtasks (task_id, title, position) VALUES (?, ?, ?)').run(taskId, title, maxPos + 1)
+  return db.prepare('SELECT * FROM subtasks WHERE id = ?').get(result.lastInsertRowid) as Subtask
+}
+
+export function updateSubtask(id: number, completed: boolean): Subtask {
+  const db = getDb()
+  db.prepare('UPDATE subtasks SET completed_at = ? WHERE id = ?').run(completed ? Date.now() : null, id)
+  return db.prepare('SELECT * FROM subtasks WHERE id = ?').get(id) as Subtask
+}
+
+export function deleteSubtask(id: number): void {
+  getDb().prepare('DELETE FROM subtasks WHERE id = ?').run(id)
+}
