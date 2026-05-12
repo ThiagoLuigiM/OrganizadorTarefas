@@ -2,7 +2,7 @@
 import { existsSync, unlinkSync } from 'fs'
 import { join } from 'path'
 import { tmpdir } from 'os'
-import { initDb, closeDb, getDb, getCategories, createCategory, deleteCategory } from '../db'
+import { initDb, closeDb, getDb, getCategories, createCategory, deleteCategory, getTasks, createTask, updateTask, deleteTask, getPendingCount } from '../db'
 
 const TEST_DB = join(tmpdir(), `ot-test-${Date.now()}.db`)
 beforeEach(() => { initDb(TEST_DB) })
@@ -47,3 +47,66 @@ describe('categories', () => {
   })
 })
 
+describe('tasks', () => {
+  it('getTasks("all") returns empty initially', () => { expect(getTasks('all')).toEqual([]) })
+
+  it('createTask inserts and returns the task', () => {
+    const task = createTask({ title: 'Test', priority: 'medium' })
+    expect(task.id).toBeGreaterThan(0)
+    expect(task.title).toBe('Test')
+    expect(task.completed_at).toBeNull()
+    expect(task.category_id).toBeNull()
+  })
+
+  it('getTasks("all") returns pending tasks before completed', () => {
+    createTask({ title: 'A', priority: 'low' })
+    const b = createTask({ title: 'B', priority: 'high' })
+    updateTask(b.id, { completed_at: Date.now() })
+    expect(getTasks('all')[0].title).toBe('A')
+  })
+
+  it('getTasks("priority") returns only high-priority pending', () => {
+    createTask({ title: 'Low', priority: 'low' })
+    createTask({ title: 'High', priority: 'high' })
+    const tasks = getTasks('priority')
+    expect(tasks).toHaveLength(1)
+    expect(tasks[0].title).toBe('High')
+  })
+
+  it('getTasks("today") returns tasks due today', () => {
+    const today = new Date(); today.setHours(12, 0, 0, 0)
+    const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate() + 1)
+    createTask({ title: 'Today', priority: 'medium', due_at: today.getTime() })
+    createTask({ title: 'Tomorrow', priority: 'medium', due_at: tomorrow.getTime() })
+    const tasks = getTasks('today')
+    expect(tasks).toHaveLength(1)
+    expect(tasks[0].title).toBe('Today')
+  })
+
+  it('getTasks(categoryId) returns tasks for that category', () => {
+    const cat = createCategory({ name: 'Work', color: '#fff' })
+    createTask({ title: 'Work task', priority: 'low', category_id: cat.id })
+    createTask({ title: 'No cat', priority: 'low' })
+    expect(getTasks(cat.id)).toHaveLength(1)
+  })
+
+  it('updateTask updates specified fields only', () => {
+    const task = createTask({ title: 'Old', priority: 'low' })
+    const updated = updateTask(task.id, { title: 'New', priority: 'high' })
+    expect(updated.title).toBe('New')
+    expect(updated.priority).toBe('high')
+  })
+
+  it('deleteTask removes the task', () => {
+    const task = createTask({ title: 'Del', priority: 'low' })
+    deleteTask(task.id)
+    expect(getTasks('all')).toHaveLength(0)
+  })
+
+  it('getPendingCount counts only incomplete tasks', () => {
+    const t1 = createTask({ title: 'T1', priority: 'low' })
+    createTask({ title: 'T2', priority: 'low' })
+    updateTask(t1.id, { completed_at: Date.now() })
+    expect(getPendingCount()).toBe(1)
+  })
+})
